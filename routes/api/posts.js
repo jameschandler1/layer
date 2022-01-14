@@ -104,7 +104,7 @@ router.delete('/:id', auth, async (req, res) => {
 //@desc     Like a post
 //@access   Private
 
-router.put('/like/:id', auth, async () => {
+router.put('/like/:id', auth, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         //check if post is already liked by user
@@ -114,7 +114,7 @@ router.put('/like/:id', auth, async () => {
         post.likes.unshift({ user: req.user.id });
         await post.save();
         res.json(post.likes);
-    } catch (error) {
+    } catch (err) {
         console.error(err.message);
         res.status(500).send("Server Error");
     }
