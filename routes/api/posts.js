@@ -299,5 +299,33 @@ router.put("/comment/:id/:comment_id/likes", auth, async (req, res) => {
   }
 });
 
+//@route PUT api/posts/comment/:id/:comment_id/unlike
+//@desc     UNLike a comment
+//@access   Private
+
+router.put("/comment/:id/:comment_id/unlike", auth, async (req, res) => {
+     try {
+       const post = await Post.findById(req.params.id);
+       const comment = post.comments.find(comment => comment.id === req.params.comment_id);
+       //check if post is already liked by user
+       if (
+         comment.likes.filter(like => like.user.toString() === req.user.id)
+           .length === 0
+       ) {
+         return res.status(400).json({ msg: "You haven't liked this post" });
+       }
+       //get remove index
+       const removeIndex = comment.likes
+         .map((like) => like.user.toString())
+         .indexOf(req.user.id);
+       comment.likes.splice(removeIndex, 1);
+       await post.save();
+       res.json(comment.likes);
+     } catch (err) {
+       console.error(err.message);
+       res.status(500).send("Server Error");
+     }
+})
+
 
 module.exports = router;
