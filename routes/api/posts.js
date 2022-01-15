@@ -71,6 +71,32 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
+//@route PUT /api//posts/:id
+//@desc     Update post
+//@access   Private
+
+router.put('/:id', auth, async (req, res) => {
+    try {
+    const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+        });
+    
+    if(!post){
+        return res.status(404).json({msg: 'Post not found'});
+    }
+    //check user
+    if(post.user.toString() !== req.user.id){
+        return res.status(401).json({msg: 'User not authorized'});
+    }
+
+    await post.save();
+    res.json(post);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Server Error");
+    }
+})
+
 //@route   DELETE api/posts/:id
 //@desc     delets a post from the database
 //@access   Private
