@@ -273,5 +273,31 @@ router.delete('/comment/:id/:comment_id', auth ,async (req, res) => {
     }
 })
 
+//@route PUT /api/posts/comment/:id/:comment_id/like
+//@desc     like a comment
+//@access   Private
+
+router.put("/comment/:id/:comment_id/likes", auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    const comment = post.comments.find(
+      (comment) => comment.id === req.params.comment_id
+    );
+    //check if post is already liked by user
+    if (
+      comment.likes.filter((like) => like.user.toString() === req.user.id).length >
+      0
+    ) {
+      return res.status(400).json({ msg: "You've already liked this comment" });
+    }
+    comment.likes.unshift({ user: req.user.id });
+    await post.save();
+    res.json(comments.likes);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 
 module.exports = router;
